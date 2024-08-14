@@ -11,4 +11,4 @@ Feel free to open a new PR.
 
 ## Demo
 
-![Demo](https://github.com/viethung0823/MassCodeAlfred/main/demo.gif)
+![Demo](https://raw.githubusercontent.com/viethung0823/MassCodeAlfred/main/demo.gif)
