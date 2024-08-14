@@ -151,7 +151,7 @@
 				<key>autopaste</key>
 				<true/>
 				<key>clipboardtext</key>
-				<string>{query}</string>
+				<string>{var:snippet}</string>
 				<key>ignoredynamicplaceholders</key>
 				<false/>
 				<key>transient</key>
@@ -200,7 +200,7 @@
 		<key>8EC3C910-0581-46FB-B0D7-02754B0B5DAB</key>
 		<dict>
 			<key>xpos</key>
-			<real>875</real>
+			<real>865</real>
 			<key>ypos</key>
 			<real>260</real>
 		</dict>
@@ -221,6 +221,10 @@
 	</dict>
 	<key>userconfigurationconfig</key>
 	<array/>
+	<key>variablesdontexport</key>
+	<array/>
+	<key>version</key>
+	<string>1.0.0</string>
 	<key>webaddress</key>
 	<string>https://github.com/viethung0823</string>
 </dict>

@@ -85,6 +85,7 @@ func searchSnippets() {
 				Subtitle(subtitle).
 				UID(snippet.Id).
 				Var("description", snippet.Description).
+				Var("snippet", snippet.Content[0].Value).
 				Arg(snippet.Content[0].Value).
 				Valid(true)
 
