@@ -9,6 +9,12 @@ Alfy also has performance issues, so in this version, I have switched to using [
 
 Feel free to open a new PR.
 
+## Tips
+In case you didn’t know using placeholder `{cursor}` in your snippet and trigger with alfred it will move your cursor at desired place.
+```
+console.log({cursor});
+```
+
 ## Demo
 
 ![Demo](https://raw.githubusercontent.com/viethung0823/MassCodeAlfred/main/demo.gif)
