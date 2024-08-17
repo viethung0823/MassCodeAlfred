@@ -25,9 +25,10 @@ type Snippet struct {
 	UpdatedAt   int64     `json:"updatedAt"`
 }
 
-type SnippetWithTags struct {
+type ExtendedSnippet struct {
 	Snippet
-	TagValues []string `json:"tagValues"`
+	TagValues      []string `json:"tagValues"`
+	FolderFullPath *string  `json:"parentFolderName,omitempty"`
 }
 
 type Folder struct {
@@ -82,12 +83,12 @@ func main() {
 		searchMode = "Tag"
 	}
 
-	hanleSearch(searchMode)
+	handleSearch(searchMode)
 
 	wf.SendFeedback()
 }
 
-func hanleSearch(searchMode string) {
+func handleSearch(searchMode string) {
 	if searchMode != "Title" {
 		queryParts := strings.SplitN(os.Args[1], " ", 2)
 		if len(queryParts) > 1 {
@@ -109,15 +110,21 @@ func hanleSearch(searchMode string) {
 		log.Fatalf("Error: %v", err)
 	}
 
-	snippetsWithTags := MergeTagsIntoSnippets(snippetsData, tagsData)
+	var foldersData []Folder
+	err = FetchData(APIEndpoints.GetFolders, &foldersData)
+	if err != nil {
+		log.Fatalf("Error: %v", err)
+	}
 
-	for _, snippet := range snippetsWithTags {
+	extenedSnippetDate := getExtendedSnippetDate(snippetsData, tagsData, foldersData)
+
+	for _, snippet := range extenedSnippetDate {
 		if !snippet.IsDeleted {
 			title := snippet.Name
 			subtitle := "Inbox"
 			showFragmentLabel := len(snippet.Content) > 1
-			if snippet.Folder != nil {
-				subtitle = snippet.Folder.Name
+			if snippet.Folder != nil && snippet.FolderFullPath != nil {
+				subtitle = *snippet.FolderFullPath
 			}
 
 			urlScheme := "masscode://snippets/" + snippet.Id
@@ -174,15 +181,27 @@ func FetchData(url string, target interface{}) error {
 	return nil
 }
 
-func MergeTagsIntoSnippets(snippetsData []Snippet, tagsData []Tag) []SnippetWithTags {
-	// Create a map for quick lookup of tag names by their IDs.
+func getParentFolderPath(folderId string, folderMap map[string]Folder) string {
+	folder, exists := folderMap[folderId]
+	if !exists || folder.ParentId == nil {
+		return folder.Name
+	}
+	parentPath := getParentFolderPath(*folder.ParentId, folderMap)
+	return parentPath + "/" + folder.Name
+}
+
+func getExtendedSnippetDate(snippetsData []Snippet, tagsData []Tag, foldersData []Folder) []ExtendedSnippet {
 	tagMap := make(map[string]string)
 	for _, tag := range tagsData {
 		tagMap[tag.Id] = tag.Name
 	}
 
-	// Merge tag data into snippetsData.
-	var snippetsWithTags []SnippetWithTags
+	folderMap := make(map[string]Folder)
+	for _, folder := range foldersData {
+		folderMap[folder.Id] = folder
+	}
+
+	var extendedSnippetData []ExtendedSnippet
 	for _, snippet := range snippetsData {
 		var tagValues []string
 		for _, tagId := range snippet.TagsIds {
@@ -190,11 +209,19 @@ func MergeTagsIntoSnippets(snippetsData []Snippet, tagsData []Tag) []SnippetWith
 				tagValues = append(tagValues, tagName)
 			}
 		}
-		snippetsWithTags = append(snippetsWithTags, SnippetWithTags{
-			Snippet:   snippet,
-			TagValues: tagValues,
+
+		var folderFullPath *string
+		if folder, exists := folderMap[snippet.FolderId]; exists {
+			fullPath := getParentFolderPath(folder.Id, folderMap)
+			folderFullPath = &fullPath
+		}
+
+		extendedSnippetData = append(extendedSnippetData, ExtendedSnippet{
+			Snippet:        snippet,
+			TagValues:      tagValues,
+			FolderFullPath: folderFullPath,
 		})
 	}
 
-	return snippetsWithTags
+	return extendedSnippetData
 }
