@@ -129,7 +129,6 @@ func hanleSearch(searchMode string) {
 					Var("description", snippet.Description).
 					Var("snippet", fragment.Value).
 					Arg(fragment.Value).
-					Icon(&aw.Icon{Value: fmt.Sprintf(`icons/%s.svg`, (snippet.Folder.Icon))}).
 					Valid(true)
 
 				if showFragmentLabel {
@@ -143,6 +142,12 @@ func hanleSearch(searchMode string) {
 				if searchMode == "Tag" {
 					tagsString := strings.Join(snippet.TagValues, " , ")
 					item.Match(tagsString)
+				}
+
+				iconPath := fmt.Sprintf("icons/%s.svg", snippet.Folder.Icon)
+				if _, err := os.Stat(iconPath); !os.IsNotExist(err) {
+					// Proceed with setting the icon
+					item.Icon(&aw.Icon{Value: iconPath})
 				}
 
 				item.Cmd().Arg(urlScheme).Subtitle("Open in MassCode")
