@@ -143,7 +143,7 @@ func handleSearch(searchMode string) {
 				}
 
 				if searchMode == "Folder" {
-					item.Match(snippet.Folder.Name)
+					item.Match(*snippet.FolderFullPath)
 				}
 
 				if searchMode == "Tag" {
