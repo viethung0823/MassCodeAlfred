@@ -61,7 +61,7 @@ func main() {
 }
 
 func searchSnippets() {
-	resp, err := http.Get("http://localhost:3033/snippets")
+	resp, err := http.Get("http://localhost:3033/snippets/embed-folder")
 	if err != nil {
 		log.Fatalf("Failed to fetch data: %v", err)
 	}
@@ -76,21 +76,29 @@ func searchSnippets() {
 		if !snippet.IsDeleted {
 			title := snippet.Name
 			subtitle := "Inbox"
+			showFragmentLabel := len(snippet.Content) > 1
 			if snippet.Folder != nil {
 				subtitle = snippet.Folder.Name
 			}
+
 			urlScheme := "masscode://snippets/" + snippet.Id
 
-			item := wf.NewItem(title).
-				Subtitle(subtitle).
-				UID(snippet.Id).
-				Var("description", snippet.Description).
-				Var("snippet", snippet.Content[0].Value).
-				Arg(snippet.Content[0].Value).
-				Valid(true)
+			for _, fragment := range snippet.Content {
+				item := wf.NewItem(title).
+					Subtitle(subtitle).
+					UID(snippet.Id).
+					Var("description", snippet.Description).
+					Var("snippet", fragment.Value).
+					Arg(fragment.Value).
+					Valid(true)
 
-			item.Cmd().Arg(urlScheme).Subtitle("Open in MassCode")
-			item.Opt().Subtitle("View snippet")
+				if showFragmentLabel {
+					item.Subtitle(subtitle + " - " + fragment.Label)
+				}
+
+				item.Cmd().Arg(urlScheme).Subtitle("Open in MassCode")
+				item.Opt().Subtitle("View snippet")
+			}
 		}
 	}
 }
