@@ -9,6 +9,13 @@ Alfy also has performance issues, so in this version, I have switched to using [
 
 Feel free to open a new PR.
 
+## Features
+This workflow current support search name of snippet, folder, tag, quickview snippet, open in massCode.
+1. Search name is enabled by default
+2. Search folder enabled when type "f {folderName}", example: "f Default"
+3. Search tag enabled when type "t {tags}", example: "t sort"
+(Note: awgo only supports fuzzy search so order matter and search tag might show wrong results when that snippet has multiple tags. This only can be solved when massCode supports query by tags with apis I'll update asap when they have it) 
+
 ## Tips
 In case you didn’t know using placeholder `{cursor}` in your snippet and trigger with alfred it will move your cursor at desired place.
 ```
