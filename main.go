@@ -75,11 +75,13 @@ var query = ""
 func main() {
 	query = os.Args[1]
 	searchMode := "Title"
+	folderSearchTrigger := wf.Config.GetString("folderSearchTrigger") + " "
+	tagSearchTrigger := wf.Config.GetString("tagSearchTrigger") + " "
 
 	switch {
-	case strings.HasPrefix(query, "f "):
+	case strings.HasPrefix(query, folderSearchTrigger):
 		searchMode = "Folder"
-	case strings.HasPrefix(query, "t "):
+	case strings.HasPrefix(query, tagSearchTrigger):
 		searchMode = "Tag"
 	}
 
@@ -139,7 +141,7 @@ func handleSearch(searchMode string) {
 					Valid(true)
 
 				if showFragmentLabel {
-					item.Subtitle(subtitle + " - " + fragment.Label)
+					item.Title(title + " - " + fragment.Label)
 				}
 
 				if searchMode == "Folder" {
