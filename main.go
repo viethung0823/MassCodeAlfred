@@ -132,35 +132,37 @@ func handleSearch(searchMode string) {
 			urlScheme := "masscode://snippets/" + snippet.Id
 
 			for _, fragment := range snippet.Content {
-				item := wf.NewItem(title).
-					Subtitle(subtitle).
-					UID(snippet.Id).
-					Var("description", snippet.Description).
-					Var("snippet", fragment.Value).
-					Arg(fragment.Value).
-					Valid(true)
+				if strings.TrimSpace(fragment.Value) != "" {
+					item := wf.NewItem(title).
+						Subtitle(subtitle).
+						UID(snippet.Id).
+						Var("description", snippet.Description).
+						Var("snippet", fragment.Value).
+						Arg(fragment.Value).
+						Valid(true)
 
-				if showFragmentLabel {
-					item.Title(title + " - " + fragment.Label)
+					if showFragmentLabel {
+						item.Title(title + " - " + fragment.Label)
+					}
+
+					if searchMode == "Folder" {
+						item.Match(*snippet.FolderFullPath)
+					}
+
+					if searchMode == "Tag" {
+						tagsString := strings.Join(snippet.TagValues, " , ")
+						item.Match(tagsString)
+					}
+
+					iconPath := fmt.Sprintf("icons/%s.svg", snippet.Folder.Icon)
+					if _, err := os.Stat(iconPath); !os.IsNotExist(err) {
+						// Proceed with setting the icon
+						item.Icon(&aw.Icon{Value: iconPath})
+					}
+
+					item.Cmd().Arg(urlScheme).Subtitle("Open in MassCode")
+					item.Opt().Subtitle("View snippet")
 				}
-
-				if searchMode == "Folder" {
-					item.Match(*snippet.FolderFullPath)
-				}
-
-				if searchMode == "Tag" {
-					tagsString := strings.Join(snippet.TagValues, " , ")
-					item.Match(tagsString)
-				}
-
-				iconPath := fmt.Sprintf("icons/%s.svg", snippet.Folder.Icon)
-				if _, err := os.Stat(iconPath); !os.IsNotExist(err) {
-					// Proceed with setting the icon
-					item.Icon(&aw.Icon{Value: iconPath})
-				}
-
-				item.Cmd().Arg(urlScheme).Subtitle("Open in MassCode")
-				item.Opt().Subtitle("View snippet")
 			}
 		}
 	}
