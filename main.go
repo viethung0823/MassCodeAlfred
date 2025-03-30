@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	aw "github.com/deanishe/awgo"
+	aw "github.com/viethung0823/awgo"
 )
 
 type Snippet struct {
@@ -71,12 +71,13 @@ var APIEndpoints = Endpoints{
 
 var wf = aw.New()
 var query = ""
+var searchMode = "Title"
+var folderSearchTrigger = wf.Config.GetString("folderSearchTrigger") + " "
+var tagSearchTrigger = wf.Config.GetString("tagSearchTrigger") + " "
+var queryIndicator = wf.Config.GetString("queryIndicator")
 
 func main() {
 	query = os.Args[1]
-	searchMode := "Title"
-	folderSearchTrigger := wf.Config.GetString("folderSearchTrigger") + " "
-	tagSearchTrigger := wf.Config.GetString("tagSearchTrigger") + " "
 
 	switch {
 	case strings.HasPrefix(query, folderSearchTrigger):
@@ -168,7 +169,20 @@ func handleSearch(searchMode string) {
 	}
 
 	if query != "" {
-		wf.Filter(query)
+		if searchMode != "Title" {
+			queryParts := strings.SplitN(query, queryIndicator, 2)
+			firstQuery := queryParts[0]
+			wf.Filter(firstQuery)
+			if len(queryParts) > 1 {
+				secondQuery := queryParts[1]
+				for _, item := range wf.Feedback.Items {
+					item.Match(item.GetTitle())
+				}
+				wf.Filter(secondQuery)
+			}
+		} else {
+			wf.Filter(query)
+		}
 	}
 }
 
